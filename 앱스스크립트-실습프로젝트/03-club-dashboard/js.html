@@ -1,0 +1,141 @@
+<!--
+  js.html  —  화면의 동작 (주제 ③ 동아리 활동 대시보드)
+  ------------------------------------------------------------------
+  © 2026 티쳐무 · 모든 권리 보유 — 학교 수업 목적으로만 이용해 주세요.
+  무단 배포·상업적 이용을 금합니다. 자세한 내용은 LICENSE 파일을 보세요.
+-->
+<script>
+/* ── 1. 시작할 때: 날짜 칸을 오늘로 채우고 대시보드를 불러온다 ────────── */
+window.addEventListener('load', function () {
+  // 오늘 날짜를 'yyyy-MM-dd' 문자열로 만든다.
+  // getMonth()는 0부터 시작하므로 +1을 해야 한다. (아주 흔한 실수!)
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  document.getElementById('date').value = yyyy + '-' + mm + '-' + dd;
+
+  loadSummary();
+});
+
+/* ── 2. 탭 전환 ──────────────────────────────────────────────────────── */
+function showTab(which) {
+  const isDash = (which === 'dash');
+  document.getElementById('panelDash').style.display  = isDash ? 'block' : 'none';
+  document.getElementById('panelWrite').style.display = isDash ? 'none'  : 'block';
+  document.getElementById('tabDash').setAttribute('aria-selected', isDash);
+  document.getElementById('tabWrite').setAttribute('aria-selected', !isDash);
+  if (isDash) loadSummary();
+}
+
+/* ── 3. 대시보드 불러오기 ────────────────────────────────────────────── */
+function loadSummary() {
+  google.script.run
+      .withSuccessHandler(render)
+      .withFailureHandler(function (e) { alert('불러오기 실패: ' + e.message); })
+      .getSummary();
+}
+
+function render(s) {
+  document.getElementById('statCount').textContent   = s.count + '회';
+  document.getElementById('statHours').textContent   = (s.totalHours || 0) + '시간';
+  document.getElementById('statMembers').textContent = (s.avgMembers || 0) + '명';
+
+  if (s.count === 0) {
+    ['monthBars', 'topList', 'recentTable'].forEach(function (id) {
+      document.getElementById(id).innerHTML = '<p class="empty">아직 기록이 없습니다. 먼저 기록을 추가해 보세요.</p>';
+    });
+    return;
+  }
+
+  // ── 3-1. 월별 막대: 가장 큰 값을 100%로 잡는다
+  const maxHours = Math.max.apply(null, s.byMonth.map(function (m) { return m.hours; })) || 1;
+  document.getElementById('monthBars').innerHTML = s.byMonth.map(function (m) {
+    return bar(m.month.slice(5) + '월', (m.hours / maxHours) * 100, m.hours + 'h');
+  }).join('');
+
+  // ── 3-2. 많이 한 활동
+  const maxCount = s.topActivities[0].count || 1;
+  document.getElementById('topList').innerHTML = s.topActivities.map(function (a) {
+    return bar(a.name, (a.count / maxCount) * 100, a.count + '회');
+  }).join('');
+
+  // ── 3-3. 최근 기록 표
+  const rows = s.recent.map(function (r) {
+    return '<tr>' +
+             '<td>' + escapeHtml(r.date) + '</td>' +
+             '<td>' + escapeHtml(r.name) + '</td>' +
+             '<td class="num">' + r.members + '명</td>' +
+             '<td class="num">' + r.minutes + '분</td>' +
+           '</tr>';
+  }).join('');
+
+  document.getElementById('recentTable').innerHTML =
+      '<table class="data"><thead><tr><th>날짜</th><th>활동</th><th class="num">인원</th><th class="num">시간</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table>';
+}
+
+/* ── 4. 기록 저장 ────────────────────────────────────────────────────── */
+function handleSubmit(event) {
+  event.preventDefault();
+
+  const payload = {
+    date:    document.getElementById('date').value,        // '2026-08-19' 문자열
+    name:    document.getElementById('name').value,
+    members: Number(document.getElementById('members').value),
+    minutes: Number(document.getElementById('minutes').value),
+    memo:    document.getElementById('memo').value
+  };
+
+  // 화면에서도 한 번 확인한다. (서버에서도 다시 확인하지만, 사용자에게 빨리 알려 주려고)
+  if (!payload.members || !payload.minutes) {
+    showMsg('인원과 시간은 숫자로 입력해 주세요.', 'err');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '저장하는 중…';
+
+  google.script.run
+      .withSuccessHandler(function (res) {
+        btn.disabled = false; btn.textContent = '기록 저장';
+        showMsg('저장했습니다. (총 ' + res.total + '개 기록)', 'ok');
+        document.getElementById('name').value = '';
+        document.getElementById('members').value = '';
+        document.getElementById('minutes').value = '';
+        document.getElementById('memo').value = '';
+      })
+      .withFailureHandler(function (e) {
+        btn.disabled = false; btn.textContent = '기록 저장';
+        showMsg(e.message, 'err');
+      })
+      .addRecord(payload);
+}
+
+/* ── 5. 공통 도우미 ──────────────────────────────────────────────────── */
+function bar(name, percent, value) {
+  return '<div class="bar-row">' +
+           '<span class="name">' + escapeHtml(name) + '</span>' +
+           '<span class="bar-track"><span class="bar-fill" style="width:' + percent + '%"></span></span>' +
+           '<span class="val">' + escapeHtml(value) + '</span>' +
+         '</div>';
+}
+
+function showMsg(text, type) {
+  const box = document.getElementById('formMsg');
+  box.textContent = text;
+  box.className = 'msg show ' + type;
+}
+
+function escapeHtml(text) {
+  return String(text == null ? '' : text)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ── 6. 확장 미션 ────────────────────────────────────────────────────── */
+/*  ① 막대 이름이 길면 잘리는 문제를 고쳐 보자. (.bar-row .name의 width를 조절)
+ *  ② 최근 기록 표에 메모 열을 추가해 보자. 너무 길면 어떻게 처리할까?
+ *  ③ 저장 직후 대시보드 탭으로 넘어가게 만들어 보자.
+ */
+</script>

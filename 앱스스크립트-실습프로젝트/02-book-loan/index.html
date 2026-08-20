@@ -1,0 +1,71 @@
+<!--
+  index.html  —  화면의 뼈대 (주제 ② 학급 문고 대출 관리)
+  · 아래 include 줄이 css.html과 js.html을 이 자리에 끼워 넣는다.
+  · 목록 부분은 비워 두고 js.html이 채운다. 데이터가 몇 개일지 미리 알 수 없기 때문이다.
+  ⚠ 주석 안에 스크립틀릿을 예시로 적으면 앱스 스크립트가 그것까지 실행하려 해서 오류가 난다.
+  ------------------------------------------------------------------
+  © 2026 티쳐무 · 모든 권리 보유 — 학교 수업 목적으로만 이용해 주세요.
+  무단 배포·상업적 이용을 금합니다. 자세한 내용은 LICENSE 파일을 보세요.
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <?!= include('css'); ?>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>📚 학급 문고 대출 관리</h1>
+    <p>2학년 △반 · 실명 대신 별칭을 씁니다</p>
+  </header>
+
+  <!-- 요약 -->
+  <div class="stat-row">
+    <div class="stat"><b id="statTotal">-</b><span>전체 도서</span></div>
+    <div class="stat"><b id="statOut">-</b><span>대출 중</span></div>
+  </div>
+
+  <!-- 검색 -->
+  <div class="card">
+    <div class="search">
+      <input type="text" id="keyword" placeholder="제목 또는 저자로 검색"
+             onkeyup="if(event.key==='Enter') loadBooks()">
+      <button class="ghost" onclick="loadBooks()">검색</button>
+    </div>
+    <p class="hint">검색어를 비우고 검색하면 전체 목록이 나옵니다.</p>
+  </div>
+
+  <!-- 목록 (js.html이 채운다) -->
+  <div class="card">
+    <h2>도서 목록</h2>
+    <div id="bookList"><p class="empty">불러오는 중…</p></div>
+    <div class="msg" id="listMsg"></div>
+  </div>
+
+  <!-- 새 책 등록 -->
+  <div class="card">
+    <h2>새 책 등록</h2>
+    <div class="inline-form">
+      <div class="field">
+        <label for="newTitle">제목</label>
+        <input type="text" id="newTitle" maxlength="60" placeholder="예: 페인트">
+      </div>
+      <div class="field">
+        <label for="newAuthor">저자</label>
+        <input type="text" id="newAuthor" maxlength="30" placeholder="예: 이희영">
+      </div>
+      <button class="primary" style="width:auto; padding:13px 20px" onclick="addBook()">등록</button>
+    </div>
+    <div class="msg" id="addMsg"></div>
+  </div>
+
+</div>
+<!-- 화면 아래 저작권 표시 — 학생·교사가 실제로 보는 곳 -->
+<footer class="copy">© 2026 티쳐무 · 모든 권리 보유 · 학교 수업용</footer>
+
+<?!= include('js'); ?>
+</body>
+</html>

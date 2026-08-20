@@ -1,0 +1,97 @@
+<!--
+  index.html  —  화면의 뼈대 (주제 ③ 동아리 활동 대시보드)
+  · 아래 include 줄이 css.html과 js.html을 이 자리에 끼워 넣는다.
+  ⚠ 주석 안에 스크립틀릿을 예시로 적으면 앱스 스크립트가 그것까지 실행하려 해서 오류가 난다.
+  ------------------------------------------------------------------
+  © 2026 티쳐무 · 모든 권리 보유 — 학교 수업 목적으로만 이용해 주세요.
+  무단 배포·상업적 이용을 금합니다. 자세한 내용은 LICENSE 파일을 보세요.
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <?!= include('css'); ?>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🎬 동아리 활동 대시보드</h1>
+    <p>방송부 활동 기록 · 참여자 이름은 기록하지 않습니다</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabDash"  role="tab" aria-selected="true"  onclick="showTab('dash')">대시보드</button>
+    <button class="tab" id="tabWrite" role="tab" aria-selected="false" onclick="showTab('write')">기록 추가</button>
+  </div>
+
+  <!-- ═══ 화면 1 : 대시보드 ═══════════════════════════════════════ -->
+  <section id="panelDash">
+    <div class="stat-row">
+      <div class="stat"><b id="statCount">-</b><span>총 활동 횟수</span></div>
+      <div class="stat"><b id="statHours">-</b><span>누적 시간</span></div>
+      <div class="stat"><b id="statMembers">-</b><span>평균 참여</span></div>
+    </div>
+
+    <div class="card">
+      <h2>월별 활동 시간</h2>
+      <div id="monthBars"><p class="empty">불러오는 중…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>많이 한 활동</h2>
+      <div id="topList"><p class="empty">불러오는 중…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>최근 기록</h2>
+      <div id="recentTable"><p class="empty">불러오는 중…</p></div>
+      <button class="ghost" style="margin-top:12px" onclick="loadSummary()">새로 고침</button>
+    </div>
+  </section>
+
+  <!-- ═══ 화면 2 : 기록 추가 ═══════════════════════════════════════ -->
+  <section id="panelWrite" style="display:none">
+    <form class="card" id="recordForm" onsubmit="handleSubmit(event)">
+
+      <div class="field">
+        <label for="date">활동 날짜</label>
+        <!-- type="date"를 쓰면 브라우저가 달력을 띄워 준다. 값은 '2026-08-19' 문자열이다. -->
+        <input type="date" id="date" required style="width:100%; padding:10px 12px;
+               font-size:15px; font-family:inherit; border:1px solid var(--line); border-radius:8px">
+      </div>
+
+      <div class="field">
+        <label for="name">활동명</label>
+        <input type="text" id="name" maxlength="30" required placeholder="예: 점심 방송 진행">
+      </div>
+
+      <div class="field">
+        <label for="members">참여 인원 (명)</label>
+        <input type="text" id="members" inputmode="numeric" required placeholder="예: 6">
+        <p class="hint">이름 대신 인원 수만 적습니다.</p>
+      </div>
+
+      <div class="field">
+        <label for="minutes">활동 시간 (분)</label>
+        <input type="text" id="minutes" inputmode="numeric" required placeholder="예: 45">
+      </div>
+
+      <div class="field">
+        <label for="memo">메모 (선택)</label>
+        <textarea id="memo" maxlength="200" placeholder="무엇을 했는지 한두 줄로"></textarea>
+      </div>
+
+      <button type="submit" class="primary" id="submitBtn">기록 저장</button>
+      <div class="msg" id="formMsg"></div>
+    </form>
+  </section>
+
+</div>
+<!-- 화면 아래 저작권 표시 — 학생·교사가 실제로 보는 곳 -->
+<footer class="copy">© 2026 티쳐무 · 모든 권리 보유 · 학교 수업용</footer>
+
+<?!= include('js'); ?>
+</body>
+</html>

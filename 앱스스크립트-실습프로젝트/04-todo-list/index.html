@@ -1,0 +1,73 @@
+<!--
+  index.html  —  화면의 뼈대 (주제 ④ 나의 학습 계획)
+  · 아래 include 줄이 css.html과 js.html을 이 자리에 끼워 넣는다.
+  ⚠ 주석 안에 스크립틀릿을 예시로 적으면 앱스 스크립트가 그것까지 실행하려 해서 오류가 난다.
+  ------------------------------------------------------------------
+  © 2026 티쳐무 · 모든 권리 보유 — 학교 수업 목적으로만 이용해 주세요.
+  무단 배포·상업적 이용을 금합니다. 자세한 내용은 LICENSE 파일을 보세요.
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <?!= include('css'); ?>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>✅ 나의 학습 계획</h1>
+    <p>스프레드시트에 저장되는 나만의 할 일 목록</p>
+  </header>
+
+  <div class="stat-row">
+    <div class="stat"><b id="statTodo">-</b><span>남은 일</span></div>
+    <div class="stat"><b id="statDone">-</b><span>완료</span></div>
+  </div>
+
+  <!-- 새 할 일 -->
+  <div class="card">
+    <h2>할 일 추가</h2>
+    <div class="field">
+      <label for="title">무엇을 할까요?</label>
+      <input type="text" id="title" maxlength="80" placeholder="예: 수학 익힘책 42~45쪽"
+             onkeyup="if(event.key==='Enter') addTask()">
+    </div>
+    <div class="inline-form">
+      <div class="field">
+        <label for="due">마감일 (선택)</label>
+        <input type="date" id="due" style="width:100%; padding:10px 12px; font-size:15px;
+               font-family:inherit; border:1px solid var(--line); border-radius:8px">
+      </div>
+      <div class="field">
+        <label for="priority">중요도</label>
+        <select id="priority">
+          <option>보통</option>
+          <option>높음</option>
+          <option>낮음</option>
+        </select>
+      </div>
+      <button class="primary" style="width:auto; padding:13px 22px" onclick="addTask()">추가</button>
+    </div>
+    <div class="msg" id="addMsg"></div>
+  </div>
+
+  <!-- 목록 -->
+  <div class="card">
+    <h2>목록</h2>
+    <div id="taskList"><p class="empty">불러오는 중…</p></div>
+    <div class="msg" id="listMsg"></div>
+    <div style="display:flex; gap:8px; margin-top:14px">
+      <button class="ghost" onclick="loadTasks()">새로 고침</button>
+      <button class="ghost" onclick="clearDone()">완료한 일 정리</button>
+    </div>
+  </div>
+
+</div>
+<!-- 화면 아래 저작권 표시 — 학생·교사가 실제로 보는 곳 -->
+<footer class="copy">© 2026 티쳐무 · 모든 권리 보유 · 학교 수업용</footer>
+
+<?!= include('js'); ?>
+</body>
+</html>

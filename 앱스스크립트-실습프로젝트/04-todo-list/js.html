@@ -1,0 +1,117 @@
+<!--
+  js.html  —  화면의 동작 (주제 ④ 나의 학습 계획)
+  ------------------------------------------------------------------
+  © 2026 티쳐무 · 모든 권리 보유 — 학교 수업 목적으로만 이용해 주세요.
+  무단 배포·상업적 이용을 금합니다. 자세한 내용은 LICENSE 파일을 보세요.
+-->
+<script>
+/* ── 1. 페이지가 열리면 목록을 불러온다 ──────────────────────────────── */
+window.addEventListener('load', loadTasks);
+
+/* ── 2. 목록 읽기 ────────────────────────────────────────────────────── */
+function loadTasks() {
+  google.script.run
+      .withSuccessHandler(render)
+      .withFailureHandler(function (e) { showMsg('listMsg', e.message, 'err'); })
+      .getTasks();
+}
+
+function render(data) {
+  document.getElementById('statTodo').textContent = data.todo + '개';
+  document.getElementById('statDone').textContent = data.done + '개';
+
+  if (data.tasks.length === 0) {
+    document.getElementById('taskList').innerHTML = '<p class="empty">아직 할 일이 없습니다.</p>';
+    return;
+  }
+
+  document.getElementById('taskList').innerHTML = data.tasks.map(function (t) {
+    // 완료된 항목에는 done 클래스를 붙여 글자에 줄을 긋는다 (css.html의 .item.done)
+    const sub = [t.due ? '마감 ' + t.due : '', t.priority !== '보통' ? '중요도 ' + t.priority : '']
+                .filter(Boolean).join(' · ');
+
+    return '<div class="item ' + (t.done ? 'done' : '') + '">' +
+             '<input type="checkbox" class="chk" ' + (t.done ? 'checked' : '') +
+                    ' onchange="toggle(\'' + t.id + '\', this.checked)">' +
+             '<div class="body">' +
+               '<div class="title">' + escapeHtml(t.title) + '</div>' +
+               (sub ? '<div class="sub">' + escapeHtml(sub) + '</div>' : '') +
+             '</div>' +
+             '<div class="row-btns">' +
+               '<button class="ghost" onclick="remove(\'' + t.id + '\')">삭제</button>' +
+             '</div>' +
+           '</div>';
+  }).join('');
+}
+
+/* ── 3. 추가 ─────────────────────────────────────────────────────────── */
+function addTask() {
+  const title = document.getElementById('title').value.trim();
+  if (!title) { showMsg('addMsg', '할 일을 입력해 주세요.', 'err'); return; }
+
+  const payload = {
+    title: title,
+    due: document.getElementById('due').value,
+    priority: document.getElementById('priority').value
+  };
+
+  google.script.run
+      .withSuccessHandler(function () {
+        document.getElementById('title').value = '';
+        showMsg('addMsg', '추가했습니다.', 'ok');
+        loadTasks();
+      })
+      .withFailureHandler(function (e) { showMsg('addMsg', e.message, 'err'); })
+      .addTask(payload);
+}
+
+/* ── 4. 완료 표시 바꾸기 ─────────────────────────────────────────────── */
+function toggle(id, checked) {
+  // 서버 응답을 기다리지 않고 목록을 바로 다시 불러온다.
+  // 이 방식은 간단하지만 통신이 두 번 일어난다. 어떻게 개선할 수 있을까? (확장 미션 ①)
+  google.script.run
+      .withSuccessHandler(loadTasks)
+      .withFailureHandler(function (e) { showMsg('listMsg', e.message, 'err'); loadTasks(); })
+      .toggleTask(id, checked);
+}
+
+/* ── 5. 삭제 ─────────────────────────────────────────────────────────── */
+function remove(id) {
+  if (!confirm('이 항목을 삭제할까요? 되돌릴 수 없습니다.')) return;
+
+  google.script.run
+      .withSuccessHandler(function (res) { showMsg('listMsg', res.message, 'ok'); loadTasks(); })
+      .withFailureHandler(function (e)  { showMsg('listMsg', e.message, 'err'); })
+      .deleteTask(id);
+}
+
+function clearDone() {
+  if (!confirm('완료한 항목을 모두 지울까요?')) return;
+
+  google.script.run
+      .withSuccessHandler(function (res) { showMsg('listMsg', res.message, 'ok'); loadTasks(); })
+      .withFailureHandler(function (e)  { showMsg('listMsg', e.message, 'err'); })
+      .clearDone();
+}
+
+/* ── 6. 공통 도우미 ──────────────────────────────────────────────────── */
+function showMsg(boxId, text, type) {
+  const box = document.getElementById(boxId);
+  box.textContent = text;
+  box.className = 'msg show ' + type;
+  setTimeout(function () { box.className = 'msg'; }, 2500);
+}
+
+function escapeHtml(text) {
+  return String(text == null ? '' : text)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* ── 7. 확장 미션 ────────────────────────────────────────────────────── */
+/*  ① 체크할 때 목록 전체를 다시 불러오지 않고 그 줄만 바꿔 보자.
+ *     힌트: 클릭한 요소의 부모(.item)에 done 클래스를 직접 붙였다 떼면 된다.
+ *  ② '남은 일만 보기' 필터를 만들어 보자.
+ *  ③ 완료율을 막대로 표시해 보자. (완료 / (완료+남은 일) × 100)
+ */
+</script>

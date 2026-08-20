@@ -1,0 +1,143 @@
+<!--
+  js.html  —  화면의 동작 (주제 ② 학급 문고 대출 관리)
+  브라우저에서 실행된다. 시트를 만지려면 google.script.run으로 Code.gs에 부탁한다.
+  ------------------------------------------------------------------
+  © 2026 티쳐무 · 모든 권리 보유 — 학교 수업 목적으로만 이용해 주세요.
+  무단 배포·상업적 이용을 금합니다. 자세한 내용은 LICENSE 파일을 보세요.
+-->
+<script>
+/* 지금 화면에 뿌려진 책 목록을 기억해 둔다.
+   버튼을 누를 때 서버에 다시 묻지 않고 바로 쓸 수 있어서 화면이 빨라진다. */
+let currentBooks = [];
+
+/* ── 1. 페이지가 열리면 바로 목록을 불러온다 ───────────────────────── */
+window.addEventListener('load', loadBooks);
+
+/* ── 2. R : 목록 읽기 ──────────────────────────────────────────────── */
+function loadBooks() {
+  document.getElementById('bookList').innerHTML = '<p class="empty">불러오는 중…</p>';
+
+  const keyword = document.getElementById('keyword').value;
+
+  google.script.run
+      .withSuccessHandler(renderBooks)
+      .withFailureHandler(function (e) { showMsg('listMsg', e.message, 'err'); })
+      .getBooks(keyword);
+}
+
+function renderBooks(data) {
+  currentBooks = data.books;
+
+  document.getElementById('statTotal').textContent = data.total + '권';
+  document.getElementById('statOut').textContent   = data.out + '권';
+
+  if (data.books.length === 0) {
+    document.getElementById('bookList').innerHTML = '<p class="empty">해당하는 책이 없습니다.</p>';
+    return;
+  }
+
+  // 목록 HTML을 문자열로 조립한 뒤 한 번에 넣는다.
+  // 한 줄씩 innerHTML += 하면 브라우저가 매번 화면을 다시 그려서 느려진다.
+  const html = data.books.map(function (b) {
+    const isOut = (b.status === '대출중');
+
+    const badge = isOut
+        ? '<span class="badge out">대출중</span>'
+        : '<span class="badge free">대출가능</span>';
+
+    const sub = isOut
+        ? escapeHtml(b.nick) + ' · ' + escapeHtml(b.date) + ' 대출'
+        : escapeHtml(b.author || '저자 미기재');
+
+    const buttons = isOut
+        ? '<button class="ghost" onclick="doReturn(\'' + b.id + '\')">반납</button>'
+        : '<button class="ghost" onclick="askBorrow(\'' + b.id + '\')">대출</button>' +
+          '<button class="ghost" onclick="doDelete(\'' + b.id + '\')">삭제</button>';
+
+    return '<div class="item">' +
+             badge +
+             '<div class="body">' +
+               '<div class="title">' + escapeHtml(b.title) + '</div>' +
+               '<div class="sub">' + sub + '</div>' +
+             '</div>' +
+             '<div class="row-btns">' + buttons + '</div>' +
+           '</div>';
+  }).join('');
+
+  document.getElementById('bookList').innerHTML = html;
+}
+
+/* ── 3. C : 새 책 등록 ─────────────────────────────────────────────── */
+function addBook() {
+  const title  = document.getElementById('newTitle').value.trim();
+  const author = document.getElementById('newAuthor').value.trim();
+
+  if (!title) { showMsg('addMsg', '제목을 입력해 주세요.', 'err'); return; }
+
+  google.script.run
+      .withSuccessHandler(function (res) {
+        showMsg('addMsg', '등록 완료 (' + res.id + ')', 'ok');
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newAuthor').value = '';
+        loadBooks();                                    // 목록을 다시 불러 화면을 맞춘다
+      })
+      .withFailureHandler(function (e) { showMsg('addMsg', e.message, 'err'); })
+      .addBook({ title: title, author: author });
+}
+
+/* ── 4. U : 대출 / 반납 ────────────────────────────────────────────── */
+function askBorrow(id) {
+  const book = currentBooks.find(function (b) { return b.id === id; });
+
+  // prompt는 간단하지만 좋은 방법은 아니다.
+  // 확장 미션: 화면 안에 별칭 입력 칸을 만들어 prompt를 없애 보자.
+  const nick = prompt('「' + book.title + '」을 빌립니다.\n별칭을 입력하세요. (실명 대신)');
+  if (!nick) return;
+
+  google.script.run
+      .withSuccessHandler(function (res) { showMsg('listMsg', res.message, 'ok'); loadBooks(); })
+      .withFailureHandler(function (e)  { showMsg('listMsg', e.message, 'err'); })
+      .borrowBook(id, nick);
+}
+
+function doReturn(id) {
+  google.script.run
+      .withSuccessHandler(function (res) { showMsg('listMsg', res.message, 'ok'); loadBooks(); })
+      .withFailureHandler(function (e)  { showMsg('listMsg', e.message, 'err'); })
+      .returnBook(id);
+}
+
+/* ── 5. D : 삭제 ───────────────────────────────────────────────────── */
+function doDelete(id) {
+  const book = currentBooks.find(function (b) { return b.id === id; });
+
+  // 되돌릴 수 없는 동작 앞에는 반드시 확인 절차를 둔다.
+  if (!confirm('「' + book.title + '」을 목록에서 삭제할까요?\n삭제한 줄은 되돌릴 수 없습니다.')) return;
+
+  google.script.run
+      .withSuccessHandler(function (res) { showMsg('listMsg', res.message, 'ok'); loadBooks(); })
+      .withFailureHandler(function (e)  { showMsg('listMsg', e.message, 'err'); })
+      .deleteBook(id);
+}
+
+/* ── 6. 공통 도우미 ────────────────────────────────────────────────── */
+function showMsg(boxId, text, type) {
+  const box = document.getElementById(boxId);
+  box.textContent = text;
+  box.className = 'msg show ' + type;
+  // 3초 뒤 사라지게 한다
+  setTimeout(function () { box.className = 'msg'; }, 3000);
+}
+
+function escapeHtml(text) {
+  return String(text == null ? '' : text)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* ── 7. 확장 미션 ──────────────────────────────────────────────────── */
+/*  ① prompt·confirm 대신 화면 안의 입력 칸과 확인 버튼으로 바꿔 보자.
+ *  ② '대출 중인 책만 보기' 필터 버튼을 추가해 보자. (서버를 고치지 않고도 가능하다)
+ *  ③ 검색 결과가 없을 때 "이 책을 등록할까요?" 버튼을 띄워 보자.
+ */
+</script>

@@ -1,0 +1,138 @@
+<!--
+  index.html  —  화면의 "뼈대"를 담당하는 파일
+  ------------------------------------------------------------------
+  · doGet()이 이 파일을 읽어 사용자의 브라우저로 보낸다.
+  · 아래 두 곳의 include 줄은 앱스 스크립트의 '스크립틀릿'이다.
+    서버에서 먼저 실행되어, 그 자리에 css.html / js.html의 내용이 끼워진 뒤
+    하나의 HTML로 합쳐져 전송된다.
+    → 사용자가 페이지 소스를 봐도 include 흔적은 없고 style·script만 보인다.
+
+  ⚠ 이 주석 안에 스크립틀릿을 예시로 적으면 안 된다!
+    앱스 스크립트는 주석 안까지 템플릿으로 취급해서 그것까지 실행하려 하고,
+    그러면 웹앱 전체가 오류로 열리지 않는다. 주석도 템플릿의 일부다.
+    (스크립틀릿 세 종류의 차이는 학습앱 STEP 6에 표로 정리해 두었다)
+  ------------------------------------------------------------------
+  © 2026 티쳐무 · 모든 권리 보유 — 학교 수업 목적으로만 이용해 주세요.
+  무단 배포·상업적 이용을 금합니다. 자세한 내용은 LICENSE 파일을 보세요.
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <?!= include('css'); ?>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🍚 우리 학교 급식 만족도 조사</h1>
+    <p>2학년 정보 수업 프로젝트 · 익명 설문</p>
+  </header>
+
+  <!-- ── 탭: 응답하기 / 결과보기 ─────────────────────────────────── -->
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabForm"   role="tab" aria-selected="true"  onclick="showTab('form')">응답하기</button>
+    <button class="tab" id="tabResult" role="tab" aria-selected="false" onclick="showTab('result')">결과 보기</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       화면 1 : 설문 응답
+       ══════════════════════════════════════════════════════════════ -->
+  <section id="panelForm">
+
+    <!-- 동의 안내문 — 여섯 가지가 들어 있는지 확인하며 내 프로젝트에 맞게 고친다.
+         ① 누가  ② 왜  ③ 무엇을  ④ 어떻게 쓰이는지  ⑤ 언제 지우는지  ⑥ 거부 가능 -->
+    <div class="notice">
+      <strong>읽고 시작해 주세요</strong>
+      <ul>
+        <li>○○고등학교 2학년 △△△이 <b>정보 수업 프로젝트</b>로 진행하는 설문입니다.</li>
+        <li>총 4문항, 약 1분이 걸립니다. <b>이름·학번은 받지 않습니다.</b></li>
+        <li>응답은 통계와 그래프로만 정리해 수업 발표에 사용합니다.</li>
+        <li>수집한 자료는 발표가 끝난 뒤 삭제합니다.</li>
+        <li>응답은 자유이며, 응답하지 않아도 어떤 불이익도 없습니다.</li>
+      </ul>
+    </div>
+
+    <form id="surveyForm" class="card" onsubmit="handleSubmit(event)">
+
+      <div class="field">
+        <label for="grade">1. 학년</label>
+        <select id="grade" required>
+          <option value="">선택하세요</option>
+          <option>1학년</option>
+          <option>2학년</option>
+          <option>3학년</option>
+        </select>
+        <p class="hint">학년별로 결과를 비교하기 위해서만 씁니다. 반은 묻지 않습니다.</p>
+      </div>
+
+      <div class="field">
+        <label>2. 이번 달 급식은 얼마나 만족스러웠나요?</label>
+        <div class="scale">
+          <!-- 라디오 버튼 5개. name이 같아야 하나만 선택된다. -->
+          <input type="radio" name="score" id="s1" value="1"><label for="s1">1</label>
+          <input type="radio" name="score" id="s2" value="2"><label for="s2">2</label>
+          <input type="radio" name="score" id="s3" value="3"><label for="s3">3</label>
+          <input type="radio" name="score" id="s4" value="4"><label for="s4">4</label>
+          <input type="radio" name="score" id="s5" value="5"><label for="s5">5</label>
+        </div>
+        <p class="hint">1 = 전혀 만족하지 않음 · 5 = 매우 만족</p>
+      </div>
+
+      <div class="field">
+        <label for="menu">3. 가장 좋았던 메뉴 (선택)</label>
+        <input type="text" id="menu" maxlength="30" placeholder="예: 닭갈비">
+      </div>
+
+      <div class="field">
+        <label for="comment">4. 개선하고 싶은 점 (선택)</label>
+        <textarea id="comment" maxlength="200" placeholder="자유롭게 적어 주세요"></textarea>
+        <p class="hint">이름이나 특정인을 알 수 있는 내용은 적지 말아 주세요. (최대 200자)</p>
+      </div>
+
+      <button type="submit" class="primary" id="submitBtn">제출하기</button>
+      <div class="msg" id="formMsg"></div>
+    </form>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       화면 2 : 결과 보기  (내용은 js.html이 채워 넣는다)
+       ══════════════════════════════════════════════════════════════ -->
+  <section id="panelResult" style="display:none">
+    <div class="card">
+      <h2>한눈에 보기</h2>
+      <div class="stat-row">
+        <div class="stat"><b id="statTotal">-</b><span>전체 응답</span></div>
+        <div class="stat"><b id="statAvg">-</b><span>평균 만족도</span></div>
+      </div>
+      <button class="ghost" onclick="loadStats()">새로 고침</button>
+    </div>
+
+    <div class="card">
+      <h2>점수 분포</h2>
+      <div id="distBars"><p class="empty">불러오는 중…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>학년별 평균</h2>
+      <div id="gradeBars"><p class="empty">불러오는 중…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>최근 의견</h2>
+      <div id="commentList"><p class="empty">불러오는 중…</p></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- 동작(자바스크립트)은 맨 아래에서 불러온다.
+     위쪽 HTML이 먼저 만들어진 뒤에 스크립트가 실행되어야
+     document.getElementById가 요소를 찾을 수 있다. -->
+<!-- 화면 아래 저작권 표시 — 학생·교사가 실제로 보는 곳 -->
+<footer class="copy">© 2026 티쳐무 · 모든 권리 보유 · 학교 수업용</footer>
+
+<?!= include('js'); ?>
+</body>
+</html>
