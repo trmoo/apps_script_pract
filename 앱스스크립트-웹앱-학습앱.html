@@ -585,8 +585,8 @@ footer.foot{max-width:1180px; margin:0 auto; padding:26px 20px 60px; color:var(-
     <div class="f"><label>필수 1 <span class="h">이게 안 되면 앱이 아니다</span></label><input type="text" data-k="must1" placeholder="…는 …할 수 있다"></div>
     <div class="f"><label>필수 2</label><input type="text" data-k="must2" placeholder="…는 …할 수 있다"></div>
     <div class="f"><label>필수 3</label><input type="text" data-k="must3" placeholder="…는 …할 수 있다"></div>
-    <div class="f"><label>선택 1 <span class="h">시간이 남으면 한다</span></label><input type="text" data-k="opt1" placeholder=""></div>
-    <div class="f"><label>선택 2</label><input type="text" data-k="opt2" placeholder=""></div>
+    <div class="f"><label>선택 1 <span class="h">시간이 남으면 한다</span></label><input type="text" data-k="opt1" placeholder="예) 학생은 지금까지 모인 응답 수를 볼 수 있다"></div>
+    <div class="f"><label>선택 2</label><input type="text" data-k="opt2" placeholder="예) 학생은 결과를 학년별 막대 그래프로 볼 수 있다"></div>
     <div class="f"><label>이번에 <b>하지 않을 것</b> <span class="h">범위를 자르는 것도 설계다. 예: 로그인, 사진 업로드, 알림</span></label>
       <input type="text" data-k="notdo" placeholder="이번 프로젝트에서 제외할 기능"></div>
   </div>
@@ -1221,12 +1221,12 @@ footer.foot{max-width:1180px; margin:0 auto; padding:26px 20px 60px; color:var(-
       "…할 수 있다" → "정말 되는지 눌러 봤다". 실행한 결과를 통과/실패로 적는다.</div>
     <div class="f"><label>필수 1 테스트 — 무엇을 해 봤고 결과는?</label>
       <input type="text" data-k="t1" placeholder="예) 빈 폼 제출 → 안내 뜸, 시트에 빈 줄 없음 → 통과"></div>
-    <div class="f"><label>필수 2 테스트</label><input type="text" data-k="t2" placeholder=""></div>
-    <div class="f"><label>필수 3 테스트</label><input type="text" data-k="t3" placeholder=""></div>
+    <div class="f"><label>필수 2 테스트</label><input type="text" data-k="t2" placeholder="예) 만족도를 안 고르고 제출 → '만족도를 골라 주세요' 안내 → 통과"></div>
+    <div class="f"><label>필수 3 테스트</label><input type="text" data-k="t3" placeholder="예) 제출 뒤 시트 확인 → 열 순서대로 한 줄 늘어남 → 통과"></div>
     <div class="f"><label>일부러 부순 시도와 결과 <span class="h">위 표에서 최소 3개</span></label>
       <textarea data-k="t4" placeholder="예) 숫자칸에 abc 입력 → 시트에 저장됨 ✗ 실패 → validate_에 isNaN 검사 추가함"></textarea></div>
     <div class="f"><label>아직 못 고친 문제 <span class="h">숨기지 않고 적는 것이 실력이다</span></label>
-      <input type="text" data-k="t5" placeholder=""></div>
+      <input type="text" data-k="t5" placeholder="예) 제출 단추를 빠르게 두 번 누르면 같은 응답이 두 줄 저장된다. 단추 잠그기를 아직 못 넣었다."></div>
   </div>
 
   <h3 class="sub">디버깅 — 추측하지 말고 확인한다</h3>
@@ -1488,9 +1488,9 @@ Code.gs에 saveResponse(payload)가 이미 있어.
     <div class="f"><label>AI를 쓴 부분과, <b>내가 판단해서 고친 부분</b></label>
       <textarea data-k="r3" placeholder="예: 통계 함수를 AI에게 받았는데 머리글을 안 잘라서 NaN이 나왔다. slice(1)을 추가했다."></textarea></div>
     <div class="f"><label>이 앱을 다른 사람이 <b>나쁘게 쓴다면</b> 어떻게 쓸 수 있을까</label>
-      <textarea data-k="r4" placeholder=""></textarea></div>
+      <textarea data-k="r4" placeholder="예: 주소를 아는 사람은 누구나 열 수 있으니, 같은 사람이 수십 번 제출해 결과를 흔들 수 있다. 이름을 안 받아서 누가 했는지도 알 수 없다."></textarea></div>
     <div class="f"><label>다음에 한 차시가 더 있다면 무엇을 추가할까</label>
-      <textarea data-k="r5" placeholder=""></textarea></div>
+      <textarea data-k="r5" placeholder="예: 중복 제출 막기. 그리고 결과 화면을 학년별로 나눠서 보여 주기."></textarea></div>
   </div>
 
   <div class="box ok">
@@ -1560,6 +1560,8 @@ const TOPICS = [
     level:'★★☆ 기준 주제 · 데이터 윤리를 가장 깊게 다룬다',
     accent:'#2f6df6', accent2:'#e9f0ff', ink:'#1a3f9e',
     sheet:'응답', cols:'타임스탬프 | 학년 | 만족도 | 좋았던 메뉴 | 개선 의견',
+    ex:{ q:'학년에 따라 급식 만족도가 다를까?',
+         cols:'시트 이름: 응답\n타임스탬프 — 언제 답했는지 시간대별 분석\n학년 — 학년별 비교를 발표에 넣을 예정\n만족도(1~5) — 이 프로젝트의 핵심 값\n개선 의견 — 숫자로 안 보이는 이유를 알기 위해' },
     api:'?api=stats',
     note:'사람에게 직접 받는 데이터(B 경로)다. 동의 안내문 6요소와 최소 수집을 반드시 점검한다.' },
 
@@ -1569,6 +1571,8 @@ const TOPICS = [
     level:'★★★ 기능이 가장 많다',
     accent:'#0f9d58', accent2:'#e6f4ec', ink:'#0a6b3c',
     sheet:'도서목록 + 대출기록', cols:'도서ID | 제목 | 저자 | 상태 | 대출자 별칭 | 대출일',
+    ex:{ q:'우리 반에서 가장 많이 빌려 간 책은 무엇일까?',
+         cols:'시트 이름: 도서목록\n도서ID — 같은 제목이 여러 권일 때 줄을 찾기 위해\n제목 — 목록과 검색에 쓴다\n저자 — 검색에 쓴다\n상태 — 대출중인지 보유중인지 한눈에 보기 위해\n대출자 별칭 — 실명 대신 별칭. 누가 무엇을 읽었는지는 취향 정보다\n대출일 — 오래된 대출을 찾기 위해' },
     api:'?api=books',
     note:'대출자는 실명 대신 별칭을 쓴다. 누가 무엇을 읽었는지는 취향에 관한 정보다.' },
 
@@ -1578,6 +1582,8 @@ const TOPICS = [
     level:'★★☆ 날짜와 집계를 배운다',
     accent:'#7c3aed', accent2:'#f1eafe', ink:'#5b21b6',
     sheet:'활동기록', cols:'날짜 | 활동명 | 참여 인원 | 활동 시간(분) | 메모',
+    ex:{ q:'우리 동아리는 어떤 활동에 시간을 가장 많이 썼을까?',
+         cols:'시트 이름: 활동기록\n날짜 — 월별로 묶어 집계하기 위해\n활동명 — 인기 있는 활동을 세기 위해\n참여 인원 — 이름 대신 인원 수만 적는다\n활동 시간(분) — 누적 시간을 내기 위해\n메모 — 숫자로 안 보이는 내용을 남기려고' },
     api:'?api=summary',
     note:'참여자 이름 대신 인원 수만 기록한다. "누가 안 왔는지"는 이 대시보드의 질문이 아니다.' },
 
@@ -1587,6 +1593,8 @@ const TOPICS = [
     level:'★☆☆ 입문용 · 남의 데이터를 다루지 않는다',
     accent:'#ea580c', accent2:'#fdeee4', ink:'#9a3412',
     sheet:'할일', cols:'ID | 등록일 | 할 일 | 마감일 | 중요도 | 완료',
+    ex:{ q:'나는 어떤 과목의 계획을 가장 많이 미루고 있을까?',
+         cols:'시트 이름: 할일\nID — 체크하거나 지울 때 줄을 찾기 위해\n등록일 — 언제 세운 계획인지 보려고\n할 일 — 화면에 보여 줄 내용\n마감일 — 남은 날짜를 계산하기 위해\n중요도 — 무엇부터 할지 정하려고\n완료 — 체크 여부' },
     api:'?api=tasks',
     note:'내 기록만 저장되므로 배포 시 접근 권한을 「나만」으로 두는 것이 자연스럽다.' }
 ];
@@ -1944,6 +1952,18 @@ function setTopic(i){
     r.removeProperty('--accent-ink');
   }
 
+  // 주제가 바뀌면 양식의 회색 예시도 그 주제 것으로 바꾼다.
+  // 학생이 비워 두면 이 예시가 그대로 산출물에 들어가므로 주제와 맞아야 한다.
+  const setPH = function(k, v){
+    const el = document.querySelector('[data-k="' + k + '"]');
+    if (el) el.setAttribute('placeholder', v);
+  };
+  if (t.ex) {
+    setPH('dq', '예: ' + t.ex.q);
+    setPH('dcols', t.ex.cols);
+  }
+  setPH('p2', "'" + t.sheet + "' 시트: " + t.cols);
+
   document.getElementById('viewerNote').innerHTML =
     '선택한 주제: <b>' + esc(t.name) + '</b> · 시트: <code>' + esc(t.sheet) + '</code> · ' +
     '열: <code>' + esc(t.cols) + '</code> · API 주소: <code>' + esc(t.api) + '</code><br>' +
@@ -2094,10 +2114,15 @@ function toggleBug(n){
 /* ══════════════════════════════════════════════════════════════════════
    8. 양식 — 프롬프트 조립 · 복사 · 내려받기
    ══════════════════════════════════════════════════════════════════════ */
-function buildPrompt(){
+/* 위 여섯 칸을 모아 프롬프트 한 덩이로 만든다. 화면에 넣지는 않는다.
+   (collectWork 도 이 함수를 써서, 단추를 안 눌러도 산출물에 프롬프트가 들어간다) */
+function promptText(){
+  // 빈 칸은 회색 예시(placeholder)를 그대로 값으로 삼는다. ⬇ 내 작업 과 같은 규칙이다.
   const g = function(k){
     const el = document.querySelector('[data-k="' + k + '"]');
-    return el ? el.value.trim() : '';
+    if (!el) return '';
+    return el.value.trim() ||
+           (el.getAttribute('placeholder') || '').replace(/^예\s*[:)]\s*/, '').trim();
   };
   const t = TOPICS[topicIdx];
 
@@ -2109,8 +2134,12 @@ function buildPrompt(){
     '[답의 형식] ' + g('p5') + '\n' +
     '[검증] ' + g('p6') + '\n';
 
+  return text;
+}
+
+function buildPrompt(){
   const box = document.getElementById('pfull');
-  box.value = text;
+  box.value = promptText();
   box.focus();
 }
 
@@ -2175,7 +2204,13 @@ function collectWork(){
       const hint = clone.querySelector('.h');
       if (hint) hint.remove();
       const name = clone.textContent.replace(/\s+/g, ' ').trim();
-      const val = (input.value || '').trim();
+      // 학생이 비워 둔 칸은 회색 예시(placeholder)를 그대로 값으로 삼는다.
+      // 앞의 '예:' / '예)' 는 떼어 내야 문장으로 읽힌다.
+      const typed = (input.value || '').trim();
+      const sample = input.getAttribute('data-k') === 'pfull'
+          ? promptText().trim()                                  // 단추를 안 눌렀어도 조립해 넣는다
+          : (input.getAttribute('placeholder') || '').replace(/^예\s*[:)]\s*/, '').trim();
+      const val = typed || sample;
       out += '**' + name + '**\n\n' + (val ? val.split('\n').map(function(l){ return '> ' + l; }).join('\n') : '> (미작성)') + '\n\n';
     });
     out += '\n';
